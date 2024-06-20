@@ -1,0 +1,99 @@
+@page "/create-transaction"
+@inject CartaoCard.Services.CieloService CieloService
+@using CartaoCard.Components.Pages
+@using CartaoCard.Components.Models 
+
+<h3>Criar Transação</h3>
+@code {
+    public string? numeroCartaoTemporario;
+    public string? titularCartaoTemporario;
+    public string? dataExpiracaoTemporaria;
+    public string? codigoSegurancaTemporario;
+    public decimal? valorTemporario;
+    
+    public TransactionModel transactionModel = new TransactionModel();
+    
+    private bool transactionCreated = false;
+
+    private async Task HandleValidSubmit()
+    {
+        Random random = new Random();
+        string merchantOrderId = random.Next(100000000, 999999999).ToString().PadLeft(16, '0');
+        transactionModel.MerchantOrderId = merchantOrderId;
+       
+        Console.WriteLine($"Valores do formulário: {transactionModel.CardNumber}, {titularCartaoTemporario}, {dataExpiracaoTemporaria}, {codigoSegurancaTemporario}, {valorTemporario}");
+
+        // Verifica se todos os campos obrigatórios estão preenchidos
+        if (string.IsNullOrEmpty(transactionModel.CardHolder))
+        {
+            Console.WriteLine("Dados da transação incompletos ou inválidos.");
+            return;
+        }
+
+        try
+        {
+            await CieloService.CreateTransactionAsync(transactionModel);
+            transactionCreated = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao criar transação: {ex.Message}");
+        }
+        
+
+        Console.WriteLine($"Transaction Data depois: {transactionModel.MerchantOrderId}, {transactionModel.CardNumber}, {transactionModel.CardHolder}, {transactionModel.ExpirationDate}, {transactionModel.SecurityCode}, {transactionModel.Amount}");
+
+        StateHasChanged();
+    }
+
+    private async Task CancelTransaction()
+    {
+        try
+        {
+            await CieloService.CancelTransactionAsync(transactionModel.MerchantOrderId); // Use o paymentId ao invés do merchantOrderId
+            transactionCreated = false; // Defina como false para sair do modo de visualização de transação criada
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao cancelar transação: {ex.Message}");
+        }
+    }
+}
+
+<EditForm Model="@transactionModel" method="post" OnValidSubmit="HandleValidSubmit" formname="createTransactionForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div>
+        <label for="CardNumber">Número do Cartão</label>
+        <InputText id="CardNumber" @bind-Value="transactionModel.CardNumber" />
+    </div>
+    <div>
+        <label for="titularCartaoTemporario">Titular do Cartão</label>
+        <InputText id="titularCartaoTemporario" @bind-Value="transactionModel.CardHolder" />
+    </div>
+    <div>
+        <label for="dataExpiracaoTemporaria">Data de Expiração (MM/AAAA)</label>
+        <InputText id="dataExpiracaoTemporaria" @bind-Value="transactionModel.ExpirationDate" />
+    </div>
+    <div>
+        <label for="codigoSegurancaTemporario">Código de Segurança (CVC)</label>
+        <InputText id="codigoSegurancaTemporario" @bind-Value="transactionModel.SecurityCode" />
+    </div>
+    <div>
+        <label for="valorTemporario">Valor</label>
+        <InputNumber id="valorTemporario" @bind-Value="transactionModel.Amount" />
+    </div>
+
+    <button type="submit">Criar Transação</button>
+</EditForm>
+
+   @if (transactionCreated)
+{
+    <h3>Transação Criada</h3>
+    <p><strong>Merchant Order ID:</strong> @transactionModel.MerchantOrderId</p>
+    <p><strong>Nome:</strong> @transactionModel.CardHolder</p>
+    <p><strong>Numero do Cartao:</strong> @transactionModel.CardNumber</p>
+    <p><strong>Valor:</strong> @transactionModel.Amount</p>
+    <button @onclick="CancelTransaction">Cancelar Transação</button>
+}
+

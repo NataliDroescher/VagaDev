@@ -1,0 +1,41 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\natal\\CartaoCard\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\CartaoCard.bundle.scp.css",
+      "PackagePath": "staticwebassets\\CartaoCard.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\Users\\natal\\CartaoCard\\wwwroot\\app.css",
+      "PackagePath": "staticwebassets\\app.css"
+    },
+    {
+      "Id": "C:\\Users\\natal\\CartaoCard\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\Users\\natal\\CartaoCard\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\natal\\CartaoCard\\wwwroot\\favicon.png",
+      "PackagePath": "staticwebassets\\favicon.png"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.CartaoCard.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.CartaoCard.props",
+      "PackagePath": "build\\CartaoCard.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.CartaoCard.props",
+      "PackagePath": "buildMultiTargeting\\CartaoCard.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.CartaoCard.props",
+      "PackagePath": "buildTransitive\\CartaoCard.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
