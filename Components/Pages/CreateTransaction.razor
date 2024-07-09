@@ -1,99 +1,192 @@
 @page "/create-transaction"
 @inject CartaoCard.Services.CieloService CieloService
-@using CartaoCard.Components.Pages
-@using CartaoCard.Components.Models 
+@using CartaoCard.Components.Models
+@inject ILogger<CreateTransaction> Logger
 
-<h3>Criar Transação</h3>
+<h3 style="font-family: 'Roboto', sans-serif; font-size: 28px; font-weight: normal; color: #1748b1;">Criar Transação</h3>
+
+   
+<form method="post" @onsubmit="HandleValidSubmit" @formname="starship-plain-form">
+    <AntiforgeryToken />
+    <br>
+    <div class="form-group">
+         <label  style="font-weight: bold; color: #333;">
+            Numero Cartao: 
+            <InputText class="form-control" @bind-Value="Model!.Numero" />
+        </label>
+    
+         <label style="font-weight: bold; color: #333;">
+            Titular: 
+            <InputText class="form-control" @bind-Value="Model!.Titular" />
+        </label>
+    </div>
+    <br>
+
+    <div class="form-group">
+         <label style="font-weight: bold; color: #333;">
+            Data Validade (MM/AAAA): 
+            <InputText class="form-control" @bind-Value="Model!.Data" />
+        </label>
+    
+         <label style="font-weight: bold;  color: #333;">
+            Codigo de Seguranca: 
+            <InputText class="form-control" @bind-Value="Model!.Seguranca" />
+        </label>
+    
+         <label style="font-weight: bold; color: #333;">
+            valor: 
+            <InputText class="form-control" @bind-Value="Model!.Valor" />
+        </label>
+    </div>
+    <br>
+    <div>
+        <style>
+            .rounded-button {
+                border-radius: 20px; 
+            }
+        </style>
+        <button type="submit" class="btn btn-outline-primary rounded-button">Criar Transação</button>
+    </div>
+</form>
+<br>
+
+
+@if(transactionCreated){
+
+   <h3 >Transação Criada</h3>
+   
+    <div class="card card-outline-{#333} text-xs-cente">
+        <div class="card-block">
+            <p style=" color: #1748b1;"><strong><i class="fas fa-id-badge"></i> Merchant Order ID:</strong> @transactionModel.MerchantOrderId</p>
+            <p style=" color: #1748b1;"><strong>PaymentId:</strong> <span class="custom-font">@transactionModel.PaymentId</span></p>
+            <p><strong style="font-weight: bold; color: #333;">Nome:</strong> <span class="custom-font">@transactionModel.CardHolder</span></p>
+            <p><strong style="font-weight: bold; color: #333;">Número do Cartão:</strong> <span class="custom-font">@transactionModel.CardNumber</span></p>
+            <p><strong style="font-weight: bold; color: #333;">Valor:</strong> <span class="custom-font">@transactionModel.Amount</span></p>
+        </div>        
+        <button type="button" @onclick="CancelTransaction">Cancelar Transação</button>  
+    </div>
+
+}
 @code {
-    public string? numeroCartaoTemporario;
-    public string? titularCartaoTemporario;
-    public string? dataExpiracaoTemporaria;
-    public string? codigoSegurancaTemporario;
-    public decimal? valorTemporario;
-    
+
     public TransactionModel transactionModel = new TransactionModel();
-    
     private bool transactionCreated = false;
+    private string transactionStatus = "";
+    [SupplyParameterFromForm]
+    public Starship? Model { get; set; }
+
+    protected override void OnInitialized() => Model ??= new();
 
     private async Task HandleValidSubmit()
     {
-        Random random = new Random();
-        string merchantOrderId = random.Next(100000000, 999999999).ToString().PadLeft(16, '0');
-        transactionModel.MerchantOrderId = merchantOrderId;
+        var card = Model?.Numero;
+        var seg = Model?.Seguranca;
+        char bandeira = card.FirstOrDefault(char.IsDigit);
+        if(bandeira == '4' || bandeira == '5' ){
+            if (!string.IsNullOrEmpty(seg) && seg.Length <= 3){
+
+                Random random = new Random();
+                string merchantOrderId = random.Next(100000000, 999999999).ToString().PadLeft(16, '0');
+                transactionModel.MerchantOrderId = merchantOrderId;     
+                transactionModel.CardNumber = Model?.Numero;
+                transactionModel.ExpirationDate = Model?.Data;
+                transactionModel.SecurityCode = Model?.Seguranca;
+                transactionModel.Amount = Model?.Valor;
+                transactionModel.CardHolder = Model?.Titular;
+
+
+                // Verifica se todos os campos obrigatórios estão preenchidos
+                if (string.IsNullOrEmpty(transactionModel.CardHolder) ||
+                    string.IsNullOrEmpty(transactionModel.CardNumber) ||
+                    string.IsNullOrEmpty(transactionModel.ExpirationDate) ||
+                    string.IsNullOrEmpty(transactionModel.SecurityCode) ||
+                    transactionModel.Amount == null)
+                {
+                    Console.WriteLine("Dados da transação incompletos ou inválidos.");
+                    return;
+                }
+
+                try
+                {
+                    await CieloService.CreateTransactionAsync(transactionModel);
+                    transactionCreated = true;
+                    transactionStatus = "Criada";
+                    Logger.LogInformation("Transação criada com sucesso. ID: {TransactionId}", transactionModel.MerchantOrderId);
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erro ao criar transação: {ex.Message}");
+                }
+                StateHasChanged();
+            }
+            else{
+
+                Console.WriteLine("O código de segurança deve ter no maximo 3 digitos!");
+                
+
+            }
+
+        }else{
+
+            Console.WriteLine("O cartao de credito deve ser Visa ou Mastercard!");
+
+        }
        
-        Console.WriteLine($"Valores do formulário: {transactionModel.CardNumber}, {titularCartaoTemporario}, {dataExpiracaoTemporaria}, {codigoSegurancaTemporario}, {valorTemporario}");
 
-        // Verifica se todos os campos obrigatórios estão preenchidos
-        if (string.IsNullOrEmpty(transactionModel.CardHolder))
-        {
-            Console.WriteLine("Dados da transação incompletos ou inválidos.");
-            return;
-        }
-
-        try
-        {
-            await CieloService.CreateTransactionAsync(transactionModel);
-            transactionCreated = true;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Erro ao criar transação: {ex.Message}");
-        }
+      
         
-
-        Console.WriteLine($"Transaction Data depois: {transactionModel.MerchantOrderId}, {transactionModel.CardNumber}, {transactionModel.CardHolder}, {transactionModel.ExpirationDate}, {transactionModel.SecurityCode}, {transactionModel.Amount}");
-
-        StateHasChanged();
+        
     }
 
     private async Task CancelTransaction()
     {
-        try
+        Console.WriteLine("Iniciando cancelamento...");
+        if (transactionModel.PaymentId != null)
         {
-            await CieloService.CancelTransactionAsync(transactionModel.MerchantOrderId); // Use o paymentId ao invés do merchantOrderId
-            transactionCreated = false; // Defina como false para sair do modo de visualização de transação criada
+            try
+            {
+                await CieloService.CancelTransactionAsync(transactionModel.PaymentId);
+                transactionCreated = false;
+                transactionStatus = "Cancelada";
+                Console.WriteLine("Transação cancelada com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao cancelar transação: {ex.Message}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("PaymentId está vazio ou nulo.");
+        }
+        StateHasChanged();
+       
+    }
+
+    public async Task CheckTransactionStatus()
+    {
+        Console.WriteLine("Chegou aqui");
+        try
+        {            
+            var status = await CieloService.CaptureTransactionAsync(transactionModel.PaymentId);
+            transactionStatus = "status"; // Atualiza o status capturado da Cielo
+            Console.WriteLine(transactionStatus);
+
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erro ao cancelar transação: {ex.Message}");
+            Console.WriteLine($"Erro ao verificar status da transação: {ex.Message}");
         }
     }
+     public class Starship
+    {
+        
+        public string? Valor { get; set; }
+        public string? Titular { get; set; }
+        public string? Numero { get; set; }
+        public string? Data { get; set; }
+        public string? Seguranca { get; set; }
+    }
+
 }
-
-<EditForm Model="@transactionModel" method="post" OnValidSubmit="HandleValidSubmit" formname="createTransactionForm">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-    <div>
-        <label for="CardNumber">Número do Cartão</label>
-        <InputText id="CardNumber" @bind-Value="transactionModel.CardNumber" />
-    </div>
-    <div>
-        <label for="titularCartaoTemporario">Titular do Cartão</label>
-        <InputText id="titularCartaoTemporario" @bind-Value="transactionModel.CardHolder" />
-    </div>
-    <div>
-        <label for="dataExpiracaoTemporaria">Data de Expiração (MM/AAAA)</label>
-        <InputText id="dataExpiracaoTemporaria" @bind-Value="transactionModel.ExpirationDate" />
-    </div>
-    <div>
-        <label for="codigoSegurancaTemporario">Código de Segurança (CVC)</label>
-        <InputText id="codigoSegurancaTemporario" @bind-Value="transactionModel.SecurityCode" />
-    </div>
-    <div>
-        <label for="valorTemporario">Valor</label>
-        <InputNumber id="valorTemporario" @bind-Value="transactionModel.Amount" />
-    </div>
-
-    <button type="submit">Criar Transação</button>
-</EditForm>
-
-   @if (transactionCreated)
-{
-    <h3>Transação Criada</h3>
-    <p><strong>Merchant Order ID:</strong> @transactionModel.MerchantOrderId</p>
-    <p><strong>Nome:</strong> @transactionModel.CardHolder</p>
-    <p><strong>Numero do Cartao:</strong> @transactionModel.CardNumber</p>
-    <p><strong>Valor:</strong> @transactionModel.Amount</p>
-    <button @onclick="CancelTransaction">Cancelar Transação</button>
-}
-

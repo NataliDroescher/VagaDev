@@ -1,0 +1,57 @@
+2024-07-09 03:16:11.370 -03:00 [INF] User profile is available. Using 'C:\Users\natal\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2024-07-09 03:16:16.373 -03:00 [INF] Now listening on: http://localhost:5204
+2024-07-09 03:16:16.384 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2024-07-09 03:16:16.385 -03:00 [INF] Hosting environment: Development
+2024-07-09 03:16:16.385 -03:00 [INF] Content root path: C:\Users\natal\CartaoCard
+2024-07-09 03:16:27.447 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5204/ - null null
+2024-07-09 03:16:28.111 -03:00 [WRN] Failed to determine the https port for redirect.
+2024-07-09 03:16:29.203 -03:00 [INF] Executing endpoint '/ (/)'
+2024-07-09 03:16:30.606 -03:00 [INF] Executed endpoint '/ (/)'
+2024-07-09 03:16:30.619 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5204/ - 200 null text/html; charset=utf-8 3176.3915ms
+2024-07-09 03:16:31.014 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5204/_framework/aspnetcore-browser-refresh.js - null null
+2024-07-09 03:16:31.027 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5204/_framework/aspnetcore-browser-refresh.js - 200 13732 application/javascript; charset=utf-8 13.44ms
+2024-07-09 03:16:31.192 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5204/_framework/blazor.web.js - null null
+2024-07-09 03:16:31.203 -03:00 [INF] Executing endpoint 'Blazor web static files'
+2024-07-09 03:16:31.211 -03:00 [INF] The file /_framework/blazor.web.js was not modified
+2024-07-09 03:16:31.212 -03:00 [INF] Executed endpoint 'Blazor web static files'
+2024-07-09 03:16:31.213 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5204/_framework/blazor.web.js - 304 null text/javascript 21.1199ms
+2024-07-09 03:16:35.313 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5204/create-transaction - null null
+2024-07-09 03:16:35.319 -03:00 [INF] Executing endpoint '/create-transaction (/create-transaction)'
+2024-07-09 03:16:35.597 -03:00 [INF] Executed endpoint '/create-transaction (/create-transaction)'
+2024-07-09 03:16:35.602 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5204/create-transaction - 200 null text/html; charset=utf-8 289.0062ms
+2024-07-09 03:16:48.059 -03:00 [INF] Request starting HTTP/1.1 POST http://localhost:5204/create-transaction - application/x-www-form-urlencoded 311
+2024-07-09 03:16:48.095 -03:00 [INF] Executing endpoint '/create-transaction (/create-transaction)'
+2024-07-09 03:16:48.823 -03:00 [INF] Start processing HTTP request POST https://apisandbox.cieloecommerce.cielo.com.br/1/sales
+2024-07-09 03:16:48.827 -03:00 [INF] Sending HTTP request POST https://apisandbox.cieloecommerce.cielo.com.br/1/sales
+2024-07-09 03:16:51.912 -03:00 [INF] Received HTTP response headers after 3079.121ms - 201
+2024-07-09 03:16:51.918 -03:00 [INF] End processing HTTP request after 3099.5185ms - 201
+2024-07-09 03:16:51.958 -03:00 [INF] Transação criada com sucesso. ID: 0000000893955405
+2024-07-09 03:16:52.033 -03:00 [INF] Executed endpoint '/create-transaction (/create-transaction)'
+2024-07-09 03:16:52.037 -03:00 [INF] Request finished HTTP/1.1 POST http://localhost:5204/create-transaction - 200 null text/html; charset=utf-8 3978.0275ms
+2024-07-09 03:16:52.344 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5204/_framework/blazor.web.js - null null
+2024-07-09 03:16:52.358 -03:00 [INF] Executing endpoint 'Blazor web static files'
+2024-07-09 03:16:52.367 -03:00 [INF] The file /_framework/blazor.web.js was not modified
+2024-07-09 03:16:52.370 -03:00 [INF] Executed endpoint 'Blazor web static files'
+2024-07-09 03:16:52.372 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5204/_framework/blazor.web.js - 304 null text/javascript 28.1365ms
+2024-07-09 03:16:52.375 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5204/_framework/aspnetcore-browser-refresh.js - null null
+2024-07-09 03:16:52.378 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5204/_framework/aspnetcore-browser-refresh.js - 200 13732 application/javascript; charset=utf-8 3.2774ms
+2024-07-09 03:18:24.998 -03:00 [INF] No action descriptors found. This may indicate an incorrectly configured application or missing application parts. To learn more, visit https://aka.ms/aspnet/mvc/app-parts
+2024-07-09 03:18:25.130 -03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5204/create-transaction - null null
+2024-07-09 03:18:25.132 -03:00 [INF] Executing endpoint '/create-transaction (/create-transaction)'
+2024-07-09 03:18:25.147 -03:00 [INF] Executed endpoint '/create-transaction (/create-transaction)'
+2024-07-09 03:18:25.148 -03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5204/create-transaction - 200 null text/html; charset=utf-8 17.3517ms
+2024-07-09 03:20:15.599 -03:00 [INF] Application is shutting down...
+2024-07-09 03:20:15.809 -03:00 [INF] Iniciando a aplicação
+2024-07-09 03:20:15.810 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2024-07-09 03:20:15.810 -03:00 [INF] Hosting environment: Development
+2024-07-09 03:20:15.811 -03:00 [INF] Content root path: C:\Users\natal\CartaoCard
+2024-07-09 03:20:15.811 -03:00 [INF] Application is shutting down...
+2024-07-09 03:20:15.814 -03:00 [FTL] A aplicação falhou ao iniciar
+System.OperationCanceledException: The operation was canceled.
+   at System.Threading.CancellationToken.ThrowOperationCanceledException()
+   at System.Threading.CancellationToken.ThrowIfCancellationRequested()
+   at Microsoft.Extensions.Hosting.Internal.Host.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.RunAsync(IHost host, CancellationToken token)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.RunAsync(IHost host, CancellationToken token)
+   at Microsoft.Extensions.Hosting.HostingAbstractionsHostExtensions.Run(IHost host)
+   at Program.<Main>$(String[] args)

@@ -1,20 +1,30 @@
 using CartaoCard.Components;
 using CartaoCard.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Http;
+using Serilog;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+// Adicionar Serilog ao Host
+builder.Host.UseSerilog();
+
+// Adicionar serviços ao contêiner
 builder.Services.AddHttpClient<CieloService>();
+builder.Services.AddSingleton<CieloService>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddRazorPages(options =>
-{
-    options.Conventions.ConfigureFilter(new IgnoreAntiforgeryTokenAttribute());
-});
 
-
-// Add services to the container.
+// Configurar o middleware de antiforgery
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -22,20 +32,40 @@ builder.Services.AddRazorComponents()
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
+// Configurar o pipeline de solicitação HTTP
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
+
+// Importante: UseRouting deve vir antes de UseEndpoints
+app.UseRouting();
+
+// Adicionar middleware de antiforgery aqui
 app.UseAntiforgery();
+
+app.MapBlazorHub();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+
+try
+{
+    Log.Information("Iniciando a aplicação");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "A aplicação falhou ao iniciar");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

@@ -32,19 +32,21 @@ namespace CartaoCard.Services
 
         public async Task CreateTransactionAsync(TransactionModel transaction)
         {
+            try
+            {
                 var request = new
                 {
                     MerchantOrderId = transaction.MerchantOrderId,
                     Customer = new
                     {
-                        Name = "John Doe"
+                        Name = transaction.CardHolder
                     },
                     Payment = new
                     {
                         Type = "CreditCard",
                         Amount = transaction.Amount,
                         Installments = 1,
-                        Capture = true,
+                        Capture = true, //transição capturada manualemnte aqui
                         CreditCard = new
                         {
                             CardNumber = transaction.CardNumber,
@@ -54,59 +56,116 @@ namespace CartaoCard.Services
                         }
                     }
                 };
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            Console.WriteLine($"Making POST request to: {_apiUrl}/1/sales");
-            Console.WriteLine($"Request body: {json}");
-
-            var response = await _httpClient.PostAsync("/1/sales", content);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorMessage = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Erro ao criar transação na Cielo. StatusCode: {response.StatusCode}. Content: {errorMessage}");
-            }
-
-            var responseBody = await response.Content.ReadAsStringAsync();
-            var responseJson = JsonSerializer.Deserialize<TransactionResponse>(responseBody);
-           // transaction.PaymentId = responseJson.Payment.PaymentId; // Adicione essa linha para capturar o paymentId
-    
-        
-        }
-
-        public class TransactionResponse
-        {
-            public string MerchantOrderId { get; set; }
-        }
-
-        public async Task CancelTransactionAsync(string paymentId)
-        {
-            try
-            {
-                var request = new
-                {
-                     
-                };
-
                 var json = JsonSerializer.Serialize(request);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PutAsync($"/1/sales/{paymentId}/void", content);
-                
+                Console.WriteLine($"Making POST request to: {_apiUrl}/1/sales");
+                Console.WriteLine($"Request body: {json}");
+
+                var response = await _httpClient.PostAsync("/1/sales", content);
 
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorMessage = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Erro ao cancelar transação na Cielo. StatusCode: {response.StatusCode}. Content: {errorMessage}");
+                    throw new Exception($"Erro ao criar transação na Cielo. StatusCode: {response.StatusCode}. Content: {errorMessage}");
                 }
+
+                var responseBody = await response.Content.ReadAsStringAsync();
+                var responseJson = JsonSerializer.Deserialize<TransactionResponse>(responseBody);
+
+                // Capturar o PaymentId da resposta da Cielo e atribuir ao seu modelo de transação
+                transaction.PaymentId = responseJson.Payment.PaymentId;
+                Console.WriteLine(transaction.PaymentId);
+                
+                
+
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
-                throw new Exception("Erro ao cancelar transação na Cielo", ex);
+                Console.WriteLine($"Erro ao criar transação na Cielo: {ex.Message}");
+                throw;
+            }     
+            Console.WriteLine("Chegou nessa parte, depois de criar");  
+            Console.WriteLine(_merchantKey);
+            Console.WriteLine(_merchantId);
+        }
+
+        public class TransactionResponse
+        {
+            public string? MerchantOrderId { get; set; }
+            public string? Status { get; set; }
+            public PaymentDetails? Payment { get; set; }
+
+            public class PaymentDetails
+            {
+                public string? PaymentId { get; set; }
+                // Outros detalhes do pagamento podem ser adicionados aqui conforme necessário
+            }
+        }
+        public async Task<string> teste(string paymentId)
+        {
+            Console.WriteLine("Teste 123:");
+            Console.WriteLine(paymentId);
+            
+            return paymentId;
+        }
+
+        public async Task<string> CaptureTransactionAsync(string paymentId)
+        {
+            Console.WriteLine("Chegou aqui 32");
+            try
+            {
+                var requestUrl = $"/1/sales/{paymentId}/capture";
+
+                var response = await _httpClient.PutAsync(requestUrl, null);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorMessage = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Erro ao capturar transação. StatusCode: {response.StatusCode}. Content: {errorMessage}");
+                    return "Erro ao capturar transação";
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                var captureResponse = JsonSerializer.Deserialize<TransactionResponse>(content);
+
+                return captureResponse.Status;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao capturar transação: {ex.Message}");
+                return "Erro ao capturar transação";
             }
         }
 
+        public async Task CancelTransactionAsync(string paymentId)
+        {
+            Console.WriteLine("Iniciando cancelamento da transação..."); 
 
+            var requestUrl = $"http://apisandbox.cieloecommerce.cielo.com.br/1/sales/{paymentId}/void";
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Put, requestUrl);
+            requestMessage.Headers.Add("MerchantId", _merchantId);
+            requestMessage.Headers.Add("MerchantKey", _merchantKey);
+
+            var response = await _httpClient.SendAsync(requestMessage);
+            response.EnsureSuccessStatusCode();
+            
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseContent);
+            
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Erro ao cancelar transação na Cielo. StatusCode: {response.StatusCode}. Content: {errorMessage}");
+            }
+
+            Console.WriteLine($"Transação com paymentId {paymentId} cancelada com sucesso.");
+            
+        
+        }
+
+       
     }
 }
